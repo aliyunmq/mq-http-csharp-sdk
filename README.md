@@ -1,4 +1,4 @@
-# MQ HTTP .Net SDK  
+# MQ HTTP C# SDK  
 Alyun MQ Documents: http://www.aliyun.com/product/ons
 
 Aliyun MQ Console: https://ons.console.aliyun.com  
