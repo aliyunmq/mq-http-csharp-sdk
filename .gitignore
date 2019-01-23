@@ -1,0 +1,7 @@
+Aliyun_MQ_SDK/bin/
+Aliyun_MQ_SDK/obj/
+.git/
+.git
+.vs/
+.vs
+.DS_Store
