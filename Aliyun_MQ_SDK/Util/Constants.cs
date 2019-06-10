@@ -25,6 +25,7 @@ namespace Aliyun.MQ.Util
 
         public const string XML_ELEMENT_MESSAGE_BODY = "MessageBody";
         public const string XML_ELEMENT_MESSAGE_TAG = "MessageTag";
+        public const string XML_ELEMENT_MESSAGE_PROPERTIES = "Properties";
         public const string XML_ELEMENT_MESSAGE_BODY_MD5 = "MessageBodyMD5";
         public const string XML_ELEMENT_MESSAGE_ID = "MessageId";
         public const string XML_ELEMENT_RECEIPT_HANDLE = "ReceiptHandle";
@@ -38,6 +39,7 @@ namespace Aliyun.MQ.Util
         public const string PARAMETER_CONSUMER = "consumer";
         public const string PARAMETER_CONSUME_TAG = "tag";
         public const string PARAMETER_NS = "ns";
+        public const string PARAMETER_TRANSACTION = "trans";
 
         public const string MESSAGE_SUB_RESOURCE = "/messages";
         public const string TOPIC_PRE_RESOURCE = "topics/";
@@ -59,5 +61,9 @@ namespace Aliyun.MQ.Util
         public const string AcceptHeader = "Accept";
 
         public const string XMQVersionHeader = "x-mq-version";
+
+        public const string MESSAGE_PROPERTIES_TIMER_KEY = "__STARTDELIVERTIME";
+        public const string MESSAGE_PROPERTIES_TRANS_CHECK_KEY = "__TransCheckT";
+        public const string MESSAGE_PROPERTIES_MSG_KEY = "KEYS";
     }
 }

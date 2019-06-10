@@ -12,6 +12,7 @@ namespace Aliyun.MQ.Model
         private string _topicName;
         private string _consumer;
         private List<string> _receiptHandles = new List<string>();
+        private string _trans;
 
         public AckMessageRequest(string topicName, string consumer, List<String> receiptHandles)
         {
@@ -50,6 +51,17 @@ namespace Aliyun.MQ.Model
         public bool IsSetInstance()
         {
             return !string.IsNullOrEmpty(this._instanceId);
+        }
+
+        internal string Trasaction
+        {
+            set { this._trans = value; }
+            get { return this._trans; }
+        }
+
+        internal bool IsSetTransaction()
+        {
+            return !string.IsNullOrEmpty(this._trans);
         }
     }
 }

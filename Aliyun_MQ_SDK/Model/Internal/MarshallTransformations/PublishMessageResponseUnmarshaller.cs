@@ -31,6 +31,10 @@ namespace Aliyun.MQ.Model.Internal.MarshallTransformations
                                 reader.Read();
                                 response.MessageBodyMD5 = reader.Value;
                                 break;
+                            case Constants.XML_ELEMENT_RECEIPT_HANDLE:
+                                reader.Read();
+                                response.ReeceiptHandle = reader.Value;
+                                break;
                         }
                         break;
                 }

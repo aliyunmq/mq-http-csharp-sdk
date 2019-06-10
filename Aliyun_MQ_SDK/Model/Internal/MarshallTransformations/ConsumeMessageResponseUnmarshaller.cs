@@ -62,6 +62,10 @@ namespace Aliyun.MQ.Model.Internal.MarshallTransformations
                                 reader.Read();
                                 message.MessageTag = reader.Value;
                                 break;
+                            case Constants.XML_ELEMENT_MESSAGE_PROPERTIES:
+                                reader.Read();
+                                AliyunSDKUtils.StringToDict(reader.Value, message.Properties);
+                                break;
                         }
                         break;
                     case System.Xml.XmlNodeType.EndElement:

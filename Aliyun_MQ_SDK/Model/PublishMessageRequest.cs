@@ -8,6 +8,7 @@ namespace Aliyun.MQ.Model
     {
         private string _messageBody;
         private string _messageTag;
+        private string _properties;
         private string _topicName;
         private string _instanceId;
 
@@ -68,5 +69,15 @@ namespace Aliyun.MQ.Model
             return !string.IsNullOrEmpty(this._instanceId);
         }
 
+        public string Properties
+        {
+            get { return this._properties; }
+            set { this._properties = value; }
+        }
+
+        public bool IsSetProperties()
+        {
+            return !string.IsNullOrEmpty(this._properties);
+        }
     }
 }

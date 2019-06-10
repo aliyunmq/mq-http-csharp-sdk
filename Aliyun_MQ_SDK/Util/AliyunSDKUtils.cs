@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Win32;
+using Aliyun.MQ.Model.Exp;
 
 namespace Aliyun.MQ.Util
 {
@@ -15,7 +16,7 @@ namespace Aliyun.MQ.Util
     {
         #region Internal Constants
 
-        internal const string SDKVersionNumber = "1.0.0";
+        internal const string SDKVersionNumber = "1.0.1";
         internal static string _userAgentBaseName = "mq-csharp-sdk";
 
         private const int DefaultConnectionLimit = 50;
@@ -94,7 +95,8 @@ namespace Aliyun.MQ.Util
                     DetermineRuntime(),
                     Environment.OSVersion.Platform,
                     DetermineOSVersion());
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 _sdkUserAgent = string.Format(CultureInfo.InvariantCulture, "{0}/{1}", _userAgentBaseName, _versionNumber);
             }
@@ -198,8 +200,13 @@ namespace Aliyun.MQ.Util
         public static long GetUnixTimeStamp(DateTime dateTime)
         {
             TimeSpan ts = dateTime - EPOCH_START;
-            return (long) ts.TotalMilliseconds;
+            return (long)ts.TotalMilliseconds;
+        }
 
+        public static long GetNowTimeStamp()
+        {
+            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return Convert.ToInt64(ts.TotalMilliseconds);
         }
 
         #endregion
@@ -330,6 +337,76 @@ namespace Aliyun.MQ.Util
             {
                 _preserveStackTrace.Invoke(exception, null);
             }
+        }
+
+        /// <summary>
+        /// IDictionary to string.
+        /// </summary>
+        /// <returns>The to string.</returns>
+        /// <param name="dict">Dict.</param>
+        public static string DictToString(IDictionary<string, string> dict)
+        {
+            if (dict == null || dict.Count == 0)
+            {
+                return string.Empty;
+            }
+            StringBuilder data = new StringBuilder(64);
+            foreach(string key in dict.Keys)
+            {
+                string value = dict[key];
+                CheckPropValid(key, value);
+                data.Append(key).Append(":").Append(value).Append("|");
+            }
+            return data.ToString();
+        }
+
+        /// <summary>
+        /// Strings to IDictionary.
+        /// </summary>
+        /// <param name="str">String.</param>
+        /// <param name="dict">Dict.</param>
+        public static void StringToDict(string str, IDictionary<string, string> dict)
+        {
+            if (string.IsNullOrEmpty(str) || dict == null)
+            {
+                return;
+            }
+
+            string[] str_array = str.Split("|");
+            foreach(string kv in str_array)
+            {
+                string[] kv_array = kv.Split(":");
+                if (kv_array.Length != 2)
+                {
+                    continue;
+                }
+                dict.Add(kv_array[0], kv_array[1]);
+            }
+        }
+
+        internal static void CheckPropValid(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+            {
+                throw new MQException("Message's property can't be null or empty");
+            }
+
+            if (IsContainSpecialChar(key) || IsContainSpecialChar(value)) 
+            {
+                throw new MQException(
+                    string.Format(
+                        "Message's property[{0}:{1}] can't contains: & \" ' < > : |",
+                        key, value
+                    )
+                );
+            }
+        }
+
+        internal static bool IsContainSpecialChar(string str)
+        {
+            return str.Contains("&") || str.Contains("<") || str.Contains(">")
+                      || str.Contains("\"") || str.Contains("\'")
+                      || str.Contains("|") || str.Contains(":");
         }
 
         #endregion

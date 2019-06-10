@@ -47,6 +47,10 @@ namespace Aliyun.MQ.Model.Internal.MarshallTransformations
             {
                 paramters.Add(Constants.PARAMETER_NS, request.IntanceId);
             }
+            if (request.IsSetTransaction())
+            {
+                paramters.Add(Constants.PARAMETER_TRANSACTION, request.Trasaction);
+            }
         }
 
         private static AckMessageRequestMarshaller _instance = new AckMessageRequestMarshaller();

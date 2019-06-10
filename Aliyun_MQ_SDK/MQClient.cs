@@ -49,6 +49,21 @@ namespace Aliyun.MQ
             return new MQProducer(instanceId, topicName, this);
         }
 
+        public MQTransProducer GetTransProdcuer(string instanceId, string topicName, string groupId)
+        {
+            if (string.IsNullOrEmpty(topicName))
+            {
+                throw new MQException("TopicName is null or empty");
+            }
+
+            if (string.IsNullOrEmpty(groupId))
+            {
+                throw new MQException("TopicName is null or empty");
+            }
+
+            return new MQTransProducer(instanceId, topicName, groupId, this);
+        }
+
         public MQConsumer GetConsumer(string instanceId, string topicName, String consumer, String messageTag)
         {
             if (string.IsNullOrEmpty(topicName))

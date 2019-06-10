@@ -14,6 +14,7 @@ namespace Aliyun.MQ.Model
         private string _messageTag;
         private uint _batchSize;
         private uint? _waitSeconds;
+        private string _trans;
 
         public ConsumeMessageRequest(string topicName, string consumer)
         {
@@ -74,6 +75,17 @@ namespace Aliyun.MQ.Model
         public bool IsSetInstance()
         {
             return !string.IsNullOrEmpty(this._instanceId);
+        }
+
+        internal string Trasaction
+        {
+            set { this._trans = value; }
+            get { return this._trans; }
+        }
+
+        internal bool IsSetTransaction()
+        {
+            return !string.IsNullOrEmpty(this._trans);
         }
     }
 }

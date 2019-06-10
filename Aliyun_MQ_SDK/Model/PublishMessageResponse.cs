@@ -7,6 +7,7 @@ namespace Aliyun.MQ.Model
     {
         private string _messageBodyMD5;
         private string _messageId;
+        private string _receiptHandle;
 
         public string MessageBodyMD5
         {
@@ -32,9 +33,22 @@ namespace Aliyun.MQ.Model
             return this._messageId != null;
         }
 
+        public string ReeceiptHandle
+        {
+            get { return this._receiptHandle; }
+            set { this._receiptHandle = value; }
+        }
+
+        internal bool IsSetReeceiptHandle()
+        {
+            return !string.IsNullOrEmpty(_receiptHandle);
+        }
+
         public override string ToString()
         {
-            return string.Format("(MessageId {0}, MessageBodyMD5 {1})", _messageId, _messageBodyMD5);
+            return IsSetReeceiptHandle()
+                ? string.Format("(MessageId {0}, MessageBodyMD5 {1}, Handle {2})", _messageId, _messageBodyMD5, _receiptHandle)
+                : string.Format("(MessageId {0}, MessageBodyMD5 {1})", _messageId, _messageBodyMD5);
         }
     }
 }

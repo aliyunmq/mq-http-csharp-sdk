@@ -29,16 +29,22 @@ namespace Aliyun.MQ.Model.Internal.MarshallTransformations
         private static void PopulateSpecialParameters(ConsumeMessageRequest request, IDictionary<string, string> paramters)
         {
             paramters.Add(Constants.PARAMETER_CONSUMER, request.Consumer);
-            if (request.IsSetInstance()) {
+            if (request.IsSetInstance()) 
+            {
                 paramters.Add(Constants.PARAMETER_NS, request.IntanceId);
             }
-            if (request.IsSetWaitSeconds())
+            if (request.IsSetWaitSeconds() && request.WaitSeconds > 0 && request.WaitSeconds < 31)
             {
                 paramters.Add(Constants.PARAMETER_WAIT_SECONDS, request.WaitSeconds.ToString());
             }
             paramters.Add(Constants.PARAMETER_BATCH_SIZE, request.BatchSize.ToString());
-            if (request.IsSetMessageTag()) {
+            if (request.IsSetMessageTag()) 
+            {
                 paramters.Add(Constants.PARAMETER_CONSUME_TAG, request.MessageTag);
+            }
+            if (request.IsSetTransaction())
+            {
+                paramters.Add(Constants.PARAMETER_TRANSACTION, request.Trasaction);
             }
         }
 

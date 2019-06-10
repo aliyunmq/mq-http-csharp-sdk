@@ -29,6 +29,8 @@ namespace Aliyun.MQ.Model.Internal.MarshallTransformations
                 writer.WriteElementString(Constants.XML_ELEMENT_MESSAGE_BODY, publicRequest.MessageBody);
             if (publicRequest.IsSetMessageTag())
                 writer.WriteElementString(Constants.XML_ELEMENT_MESSAGE_TAG, publicRequest.MessageTag);
+            if (publicRequest.IsSetProperties())
+                writer.WriteElementString(Constants.XML_ELEMENT_MESSAGE_PROPERTIES, publicRequest.Properties);
             writer.WriteEndElement();
             writer.WriteEndDocument();
             writer.Flush();

@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Collections.Generic;
+using Aliyun.MQ.Util;
 
 namespace Aliyun.MQ.Model
 {
@@ -17,6 +19,8 @@ namespace Aliyun.MQ.Model
         private long _firstConsumeTime;
         
         private uint _consumedTimes;
+
+        private readonly IDictionary<string, string> _properties = new Dictionary<string, string>();
 
         public Message() { }
 
@@ -96,5 +100,53 @@ namespace Aliyun.MQ.Model
             set { this._consumedTimes = value; }
         }
 
+        public IDictionary<string, string> Properties
+        {
+            get { return this._properties; }
+        }
+
+        public string GetProperty(string key)
+        {
+            return this._properties[key];
+        }
+
+        public string MessageKey
+        {
+            get { return this._properties[Constants.MESSAGE_PROPERTIES_MSG_KEY]; }
+        }
+
+        public long StartDeliverTime
+        {
+            get 
+            {
+                return _properties.ContainsKey(Constants.MESSAGE_PROPERTIES_TIMER_KEY)
+                                  ? long.Parse(this._properties[Constants.MESSAGE_PROPERTIES_TIMER_KEY])
+                                      : 0;
+            }
+        }
+
+        public uint TransCheckImmunityTime
+        {
+            get 
+            {
+                return _properties.ContainsKey(Constants.MESSAGE_PROPERTIES_TRANS_CHECK_KEY)
+                                  ? uint.Parse(this._properties[Constants.MESSAGE_PROPERTIES_TRANS_CHECK_KEY])
+                                      : 0;
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Format(
+                "ID:{0}, PublishTime:{1}, NextConsumeTime:{2}, ConsumedTimes:{3}, " +
+                "\nTag:{4}, BodyMD5:{5}, NextConsumeTime:{6}" +
+                "\nBody:{7}" +
+                "\nProperties:{8}" +
+                "\nMessageKey:{9}",
+                Id, PublishTime, NextConsumeTime, ConsumedTimes,
+                MessageTag, BodyMD5, NextConsumeTime, Body, AliyunSDKUtils.DictToString(Properties),
+                MessageKey
+            );
+        }
     }
 }
