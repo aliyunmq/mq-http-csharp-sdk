@@ -117,6 +117,15 @@ namespace Aliyun.MQ.Model
             set { this._properties.Add(Constants.MESSAGE_PROPERTIES_TRANS_CHECK_KEY, value.ToString()); }
         }
 
+        /// <summary>
+        /// 分区顺序消息中区分不同分区的关键字段，sharding key 于普通消息的 key 是完全不同的概念。全局顺序消息，该字段可以设置为任意非空字符串。
+        /// </summary>
+        /// <value>The message's sharding key.</value>
+        public string ShardingKey
+        {
+            set { this._properties.Add(Constants.MESSAGE_PROPERTIES_SHARDING, value); }
+        }
+
         internal bool IsSetReeceiptHandle()
         {
             return !string.IsNullOrEmpty(_receiptHandle);

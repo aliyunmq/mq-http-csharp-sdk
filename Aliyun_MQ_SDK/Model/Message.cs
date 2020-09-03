@@ -88,6 +88,9 @@ namespace Aliyun.MQ.Model
             set { this._nextConsumeTime = value; }
         }
 
+        /// <summary>
+        /// it's meaningless for orderly consume
+        /// </summary>
         public long FirstConsumeTime
         {
             get { return this._firstConsumeTime; }
@@ -133,6 +136,11 @@ namespace Aliyun.MQ.Model
                                   ? uint.Parse(this._properties[Constants.MESSAGE_PROPERTIES_TRANS_CHECK_KEY])
                                       : 0;
             }
+        }
+
+        public String ShardingKey
+        {
+            get { return this._properties[Constants.MESSAGE_PROPERTIES_SHARDING]; }
         }
 
         public override string ToString()

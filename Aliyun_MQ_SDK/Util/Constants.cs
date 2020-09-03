@@ -65,5 +65,6 @@ namespace Aliyun.MQ.Util
         public const string MESSAGE_PROPERTIES_TIMER_KEY = "__STARTDELIVERTIME";
         public const string MESSAGE_PROPERTIES_TRANS_CHECK_KEY = "__TransCheckT";
         public const string MESSAGE_PROPERTIES_MSG_KEY = "KEYS";
+        public const string MESSAGE_PROPERTIES_SHARDING = "__SHARDINGKEY";
     }
 }

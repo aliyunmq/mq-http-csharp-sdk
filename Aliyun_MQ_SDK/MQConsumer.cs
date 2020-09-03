@@ -2,6 +2,7 @@
 using Aliyun.MQ.Model;
 using Aliyun.MQ.Model.Internal.MarshallTransformations;
 using Aliyun.MQ.Runtime;
+using Aliyun.MQ.Util;
 using System.Collections.Generic;
 
 namespace Aliyun.MQ
@@ -19,7 +20,10 @@ namespace Aliyun.MQ
             this._instanceId = instanceId;
             this._topicName = topicName;
             this._consumer = consumer;
-            this._messageTag = messageTag;
+            if (messageTag != null)
+            {
+                this._messageTag = AliyunSDKUtils.UrlEncode(messageTag, false);
+            }
             this._serviceClient = serviceClient;
         }
 
@@ -86,12 +90,41 @@ namespace Aliyun.MQ
             return result.Messages;
         }
 
+        public List<Message> ConsumeMessageOrderly(uint batchSize)
+        {
+            var request = new ConsumeMessageRequest(this._topicName, this._consumer, this._messageTag);
+            request.IntanceId = this._instanceId;
+            request.BatchSize = batchSize;
+            request.Trasaction = "order";
+            var marshaller = ConsumeMessageRequestMarshaller.Instance;
+            var unmarshaller = ConsumeMessageResponseUnmarshaller.Instance;
+
+            ConsumeMessageResponse result = _serviceClient.Invoke<ConsumeMessageRequest, ConsumeMessageResponse>(request, marshaller, unmarshaller);
+
+            return result.Messages;
+        }
+
         public List<Message> ConsumeMessage(uint batchSize, uint waitSeconds)
         {
             var request = new ConsumeMessageRequest(this._topicName, this._consumer, this._messageTag);
             request.IntanceId = this._instanceId;
             request.BatchSize = batchSize;
             request.WaitSeconds = waitSeconds;
+            var marshaller = ConsumeMessageRequestMarshaller.Instance;
+            var unmarshaller = ConsumeMessageResponseUnmarshaller.Instance;
+
+            ConsumeMessageResponse result = _serviceClient.Invoke<ConsumeMessageRequest, ConsumeMessageResponse>(request, marshaller, unmarshaller);
+
+            return result.Messages;
+        }
+
+        public List<Message> ConsumeMessageOrderly(uint batchSize, uint waitSeconds)
+        {
+            var request = new ConsumeMessageRequest(this._topicName, this._consumer, this._messageTag);
+            request.IntanceId = this._instanceId;
+            request.BatchSize = batchSize;
+            request.WaitSeconds = waitSeconds;
+            request.Trasaction = "order";
             var marshaller = ConsumeMessageRequestMarshaller.Instance;
             var unmarshaller = ConsumeMessageResponseUnmarshaller.Instance;
 

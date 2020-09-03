@@ -16,7 +16,7 @@ namespace Aliyun.MQ.Util
     {
         #region Internal Constants
 
-        internal const string SDKVersionNumber = "1.0.1";
+        internal const string SDKVersionNumber = "1.0.3";
         internal static string _userAgentBaseName = "mq-csharp-sdk";
 
         private const int DefaultConnectionLimit = 50;
