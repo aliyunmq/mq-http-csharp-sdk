@@ -8,29 +8,30 @@ Aliyun MQ Console: https://ons.console.aliyun.com
 1. 下载最新版csharp sdk，解压后将工程导入到VisualStudio，其中Aliyun_MQ_SDK就是sdk所在的目录;
 2. Sample中替换相关的参数
 
-## Samples
+## Note
+1. Http consumer only support timer msg (less than 3 days), no matter the msg is produced from http or tcp protocol.
+2. Order is only supported at special server cluster.
 
-### V1.0.0 Samples
+## Samples (github)
+
 [Publish Message](https://github.com/aliyunmq/mq-http-samples/blob/master/csharp/producer.cs)
 
 [Consume Message](https://github.com/aliyunmq/mq-http-samples/blob/master/csharp/consumer.cs)
 
-### V1.0.1 Samples
-[Publish Message](https://github.com/aliyunmq/mq-http-samples/tree/101-dev/csharp/producer.cs)
+[Transaction Message](https://github.com/aliyunmq/mq-http-samples/blob/master/csharp/trans_producer.cs)
 
-[Consume Message](https://github.com/aliyunmq/mq-http-samples/tree/101-dev/csharp/consumer.cs)
+[Publish Order Message](https://github.com/aliyunmq/mq-http-samples/blob/master/csharp/order_producer.cs)
 
-[Transaction Message](https://github.com/aliyunmq/mq-http-samples/tree/101-dev/csharp/trans_producer.cs)
+[Consume Order Message](https://github.com/aliyunmq/mq-http-samples/blob/master/csharp/order_consumer.cs)
 
-### V1.0.3 Samples
-[Publish Message](https://github.com/aliyunmq/mq-http-samples/tree/103-dev/csharp/producer.cs)
+### Sample (code.aliyun.com)
 
-[Consume Message](https://github.com/aliyunmq/mq-http-samples/tree/103-dev/csharp/consumer.cs)
+[Publish Message](https://code.aliyun.com/aliware_rocketmq/mq-http-samples/blob/master/csharp/producer.cs)
 
-[Transaction Message](https://github.com/aliyunmq/mq-http-samples/tree/103-dev/csharp/trans_producer.cs)
+[Consume Message](https://code.aliyun.com/aliware_rocketmq/mq-http-samples/blob/master/csharp/consumer.cs)
 
-[Publish Order Message](https://github.com/aliyunmq/mq-http-samples/tree/103-dev/csharp/order_producer.cs)
+[Transaction Message](https://code.aliyun.com/aliware_rocketmq/mq-http-samples/blob/master/csharp/trans_producer.cs)
 
-[Consume Order Message](https://github.com/aliyunmq/mq-http-samples/tree/103-dev/csharp/order_consumer.cs)
+[Publish Order Message](https://code.aliyun.com/aliware_rocketmq/mq-http-samples/blob/master/csharp/order_producer.cs)
 
-Note: Http consumer only support timer msg(less than 3 days), no matter the msg is produced from http or tcp protocol.
+[Consume Order Message](https://code.aliyun.com/aliware_rocketmq/mq-http-samples/blob/master/csharp/order_consumer.cs)
