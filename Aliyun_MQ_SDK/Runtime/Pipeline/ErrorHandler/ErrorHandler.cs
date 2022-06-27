@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Globalization;
 using Aliyun.MQ.Runtime.Internal;
 
 namespace Aliyun.MQ.Runtime.Pipeline.ErrorHandler
@@ -80,22 +81,17 @@ namespace Aliyun.MQ.Runtime.Pipeline.ErrorHandler
         private bool ProcessException(IExecutionContext executionContext, Exception exception)
         {
             // Find the matching handler which can process the exception
-            // Start by checking if there is a matching handler for the specific exception type,
-            // if not check for handlers for it's base type till we find a match.
-            var exceptionType = exception.GetType();
-            do
+            IExceptionHandler exceptionHandler = null;
+
+            if (this.ExceptionHandlers.TryGetValue(exception.GetType(), out exceptionHandler))
             {
-                IExceptionHandler exceptionHandler = null;
-
-                if (this.ExceptionHandlers.TryGetValue(exceptionType, out exceptionHandler))
-                {
-                    return exceptionHandler.Handle(executionContext, exception);
-                }
-
-            }while(exceptionType != typeof(Exception));
+                return exceptionHandler.Handle(executionContext, exception);
+            }
 
             // No match found, rethrow the original exception.
-            return true;
+            var message = string.Format(CultureInfo.InvariantCulture,
+                    "An unexpected exception was thrown, caused by {0}", exception.Message);
+            throw new AliyunServiceException(message, exception);
         }        
     }
 }
