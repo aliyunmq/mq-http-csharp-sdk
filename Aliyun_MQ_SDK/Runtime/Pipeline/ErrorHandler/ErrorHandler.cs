@@ -90,7 +90,7 @@ namespace Aliyun.MQ.Runtime.Pipeline.ErrorHandler
 
             // No match found, rethrow the original exception.
             var message = string.Format(CultureInfo.InvariantCulture,
-                    "An unexpected exception was thrown, caused by {0}", exception.Message);
+                    "An unexpected exception {0} was thrown, caused by {1}", exception.GetType(), exception.Message);
             throw new AliyunServiceException(message, exception);
         }        
     }
