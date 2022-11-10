@@ -6,17 +6,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="NLog" Version="5.0.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Remove="Properties\launchSettings.json" />
-    <Content Remove="log4net.config" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="README.tt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="log4net.config" />
+    <None Update="Aliyun_MQ_SDK.nlog">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\exp\" />
