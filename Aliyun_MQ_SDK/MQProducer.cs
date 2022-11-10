@@ -1,15 +1,19 @@
 ﻿
+using System;
 using Aliyun.MQ.Model;
 using Aliyun.MQ.Model.Exp;
 using Aliyun.MQ.Model.Internal.MarshallTransformations;
 using Aliyun.MQ.Runtime;
 using Aliyun.MQ.Util;
 using System.Collections.Generic;
+using System.Diagnostics;
+using NLog;
 
 namespace Aliyun.MQ
 {
     public partial class MQProducer
     {
+        private static readonly Logger Logger = MqLogManager.Instance.GetCurrentClassLogger();
 
         protected string _topicName;
         protected string _instanceId;
@@ -44,22 +48,39 @@ namespace Aliyun.MQ
 
         public TopicMessage PublishMessage(TopicMessage topicMessage)
         {
-            var request = new PublishMessageRequest(topicMessage.Body, topicMessage.MessageTag);
-            request.TopicName = this._topicName;
-            request.IntanceId = this._instanceId;
-            request.Properties = AliyunSDKUtils.DictToString(topicMessage.Properties);
+            var stopwatch = new Stopwatch();
+            try
+            {
+                var request = new PublishMessageRequest(topicMessage.Body, topicMessage.MessageTag);
+                request.TopicName = this._topicName;
+                request.IntanceId = this._instanceId;
+                request.Properties = AliyunSDKUtils.DictToString(topicMessage.Properties);
 
-            var marshaller = PublishMessageRequestMarshaller.Instance;
-            var unmarshaller = PublishMessageResponseUnmarshaller.Instance;
+                var marshaller = PublishMessageRequestMarshaller.Instance;
+                var unmarshaller = PublishMessageResponseUnmarshaller.Instance;
 
-            PublishMessageResponse result = _serviceClient.Invoke<PublishMessageRequest, PublishMessageResponse>(request, marshaller, unmarshaller);
+                stopwatch.Start();
+                PublishMessageResponse result =
+                    _serviceClient.Invoke<PublishMessageRequest, PublishMessageResponse>(request, marshaller,
+                        unmarshaller);
 
-            TopicMessage retMsg = new TopicMessage(null);
-            retMsg.Id = result.MessageId;
-            retMsg.BodyMD5 = result.MessageBodyMD5;
-            retMsg.ReceiptHandle = result.ReeceiptHandle;
+                TopicMessage retMsg = new TopicMessage(null);
+                retMsg.Id = result.MessageId;
+                retMsg.BodyMD5 = result.MessageBodyMD5;
+                retMsg.ReceiptHandle = result.ReeceiptHandle;
 
-            return retMsg;
+                return retMsg;
+            }
+            finally
+            {
+                stopwatch.Stop();
+                var ts = stopwatch.Elapsed;
+                if (ts.CompareTo(TimeSpan.FromMilliseconds(500)) > 0)
+                {
+                    Logger.Warn(
+                        $"It takes too long to publish message, topic={_topicName}, instanceId={_instanceId}, message={topicMessage}, timeSpan={ts}");
+                }
+            }
         }
 
     }
