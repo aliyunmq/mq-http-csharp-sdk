@@ -15,8 +15,13 @@
                     concurrentWrites="true"
                     keepFileOpen="false" />
         </target>
+        <target name="colorConsole" xsi:type="ColoredConsole"
+                useDefaultRowHighlightingRules="true"
+                layout="${longdate} ${level:uppercase=true:padding=-5} [${processid}] [${threadid}] [${callsite}:${callsite-linenumber}] ${message} ${onexception:${exception:format=ToString,Data}}" >
+        </target>
     </targets>
     <rules>
         <logger name="*" writeTo="asyncFile" />
+        <logger name="*" writeTo="colorConsole" />
     </rules>
 </nlog>

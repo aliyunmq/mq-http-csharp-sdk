@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Text;
 using Aliyun.MQ.Runtime.Internal.Transform;
 using Aliyun.MQ.Runtime.Internal.Util;
 using Aliyun.MQ.Util;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
 {
@@ -88,6 +90,12 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
         {
             try
             {
+                var sb = new StringBuilder();
+                var svcPnt = _request.ServicePoint;
+                sb.AppendLine(svcPnt.Address.ToString());
+                sb.AppendLine($"ServicePoint HashCode = 0x{svcPnt.GetHashCode():X0000}");
+                sb.AppendLine($" * CurrentConnections (Before) = {svcPnt.CurrentConnections}");
+                Console.Write(sb.ToString());
                 var response = _request.GetResponse() as HttpWebResponse;
                 return new HttpWebRequestResponseData(response);
             }
@@ -302,7 +310,13 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
             }
 
             // Set service point properties.
-            //_request.ServicePoint.Expect100Continue = originalRequest.Expect100Continue;
+            _request.KeepAlive = true;
+            _request.ServicePoint.Expect100Continue = false;
+            _request.ServicePoint.ConnectionLimit = clientConfig.ConnectionLimit;
+            ServicePointManager.DefaultConnectionLimit = 1;
+            // _request.ServicePoint.MaxIdleTime = clientConfig.MaxIdleTime;
+            
+            _request.ServicePoint.SetTcpKeepAlive(true, 99999999, 999999999);
         }
 
         /// <summary>

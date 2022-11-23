@@ -7,6 +7,7 @@ using Aliyun.MQ.Runtime;
 using Aliyun.MQ.Util;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using NLog;
 
 namespace Aliyun.MQ
@@ -68,14 +69,13 @@ namespace Aliyun.MQ
                 retMsg.Id = result.MessageId;
                 retMsg.BodyMD5 = result.MessageBodyMD5;
                 retMsg.ReceiptHandle = result.ReeceiptHandle;
-
                 return retMsg;
             }
             finally
             {
                 stopwatch.Stop();
                 var ts = stopwatch.Elapsed;
-                if (ts.CompareTo(TimeSpan.FromMilliseconds(500)) > 0)
+                if (ts.CompareTo(TimeSpan.FromMilliseconds(50)) > 0)
                 {
                     Logger.Warn(
                         $"It takes too long to publish message, topic={_topicName}, instanceId={_instanceId}, message={topicMessage}, timeSpan={ts}");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Net;
 using System.Text;
 using Aliyun.MQ.Runtime.Internal;
 using Aliyun.MQ.Runtime.Internal.Util;
@@ -46,7 +47,6 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
                 IRequest wrappedRequest = executionContext.RequestContext.Request;
                 httpRequest = CreateWebRequest(executionContext.RequestContext);
                 httpRequest.SetRequestHeaders(wrappedRequest.Headers);
-
                 try
                 {
                     // Send request body if present.
