@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using Aliyun.MQ.Runtime.Internal;
+using Aliyun.MQ.Util;
+using NLog;
 
 namespace Aliyun.MQ.Runtime.Pipeline.RetryHandler
 {
@@ -10,6 +13,7 @@ namespace Aliyun.MQ.Runtime.Pipeline.RetryHandler
     /// </summary>
     public class RetryHandler : PipelineHandler
     {
+        private static readonly Logger Logger = MqLogManager.Instance.GetCurrentClassLogger();
         /// <summary>
         /// The retry policy which specifies when 
         /// a retry should be performed.
@@ -35,8 +39,11 @@ namespace Aliyun.MQ.Runtime.Pipeline.RetryHandler
         {
             var requestContext = executionContext.RequestContext;
             bool shouldRetry = false;
+            Stopwatch stopwatch;
             do
-            {                
+            {
+                stopwatch = new Stopwatch();
+                stopwatch.Start();
                 try
                 {
                     base.InvokeSync(executionContext);
@@ -55,6 +62,10 @@ namespace Aliyun.MQ.Runtime.Pipeline.RetryHandler
                 catch (Exception exception)
                 {
                     shouldRetry = this.RetryPolicy.Retry(executionContext, exception);
+                    stopwatch.Stop();
+                    var ts = stopwatch.Elapsed;
+                    Logger.Error(exception,
+                        $"Failed to accomplish HTTP request, timeSpan={ts}, contextId={executionContext.RequestContext.GetHashCode()}, retries={executionContext.RequestContext.Retries}, shouldRetry={shouldRetry}.");
                     if (!shouldRetry)
                     {
                         throw;
