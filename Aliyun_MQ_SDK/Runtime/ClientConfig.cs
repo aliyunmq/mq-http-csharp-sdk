@@ -13,14 +13,14 @@ namespace Aliyun.MQ.Runtime
         private int _bufferSize = AliyunSDKUtils.DefaultBufferSize;
         private ICredentials _proxyCredentials;
         private bool _disableLogging = true;
-        private TimeSpan? _timeout = null;
+        private TimeSpan? _timeout = TimeSpan.FromSeconds(3);
         private bool _allowAutoRedirect = false;
 
         private string _proxyHost;
         private int _proxyPort = -1;
         private int? _connectionLimit = 200;
         private int? _maxIdleTime;
-        private TimeSpan? _readWriteTimeout = null;
+        private TimeSpan? _readWriteTimeout = TimeSpan.FromSeconds(3);
 
         private static readonly TimeSpan InfiniteTimeout = TimeSpan.FromMilliseconds(-1);
         private static readonly TimeSpan MaxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
