@@ -7,6 +7,7 @@ using Aliyun.MQ.Runtime.Pipeline.Handlers;
 using Aliyun.MQ.Runtime.Pipeline.HttpHandler;
 using Aliyun.MQ.Runtime.Pipeline.RetryHandler;
 using Aliyun.MQ.Util;
+using Aliyun_MQ_SDK.Runtime.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -79,7 +80,12 @@ namespace Aliyun.MQ.Runtime
                 new ResponseContext()
             );
 
+            Tracing.BeforeInvoke(executionContext);
+
             var response = (TResponse)this.RuntimePipeline.InvokeSync(executionContext).Response;
+
+            Tracing.AfterInvoke(executionContext);
+
             return response;
         }
 
