@@ -66,6 +66,19 @@ namespace Aliyun.MQ.Runtime.Pipeline
 
             return _handler.InvokeAsync(executionContext);
         }
+        
+        /// <summary>
+        /// Invokes the pipeline asynchronously.
+        /// </summary>
+        /// <param name="executionContext">Request context</param>
+        /// <returns>Response context</returns>
+        public System.Threading.Tasks.Task<T> InvokeAsync<T>(IExecutionContext executionContext)
+            where T : WebServiceResponse, new()
+        {
+            ThrowIfDisposed();
+
+            return _handler.InvokeAsync<T>(executionContext);
+        }
 
         #endregion
 

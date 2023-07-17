@@ -15,6 +15,8 @@ namespace Aliyun.MQ.Runtime.Pipeline
         IServiceSigner Signer { get; }
         ClientConfig ClientConfig { get; }
         ImmutableCredentials ImmutableCredentials { get; set; }
+        
+        System.Threading.CancellationToken CancellationToken { get; }
 
         IRequest Request { get; set; }
         bool IsSigned { get; set; }
@@ -68,6 +70,8 @@ namespace Aliyun.MQ.Runtime.Internal
         public int Retries { get; set; }
         public bool IsSigned { get; set; }
         public bool IsAsync { get; set; }
+
+        public System.Threading.CancellationToken CancellationToken { get; set; }
         public WebServiceRequest OriginalRequest { get; set; }
         public IMarshaller<IRequest, WebServiceRequest> Marshaller { get; set; }
         public ResponseUnmarshaller Unmarshaller { get; set; }

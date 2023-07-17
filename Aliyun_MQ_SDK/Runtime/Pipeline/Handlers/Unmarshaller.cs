@@ -16,6 +16,51 @@ namespace Aliyun.MQ.Runtime.Pipeline.Handlers
                 Unmarshall(executionContext);  
             }                      
         }
+        
+        /// <summary>
+        /// Unmarshalls the response returned by the HttpHandler.
+        /// </summary>
+        /// <typeparam name="T">The response type for the current request.</typeparam>
+        /// <param name="executionContext">The execution context, it contains the
+        /// request and response context.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public override async System.Threading.Tasks.Task<T> InvokeAsync<T>(IExecutionContext executionContext)
+        {
+            await base.InvokeAsync<T>(executionContext).ConfigureAwait(false);
+            // Unmarshall the response
+            await UnmarshallAsync(executionContext).ConfigureAwait(false);
+            return (T)executionContext.ResponseContext.Response;
+        }
+        
+        /// <summary>
+        /// Unmarshalls the HTTP response.
+        /// </summary>
+        /// <param name="executionContext">
+        /// The execution context, it contains the request and response context.
+        /// </param>
+        private async System.Threading.Tasks.Task UnmarshallAsync(IExecutionContext executionContext)
+        {
+            var requestContext = executionContext.RequestContext;
+            var responseContext = executionContext.ResponseContext;
+
+            {
+                var unmarshaller = requestContext.Unmarshaller;
+                try
+                {
+                    var responseStream = await responseContext.HttpResponse.
+                        ResponseBody.OpenResponseAsync().ConfigureAwait(false);
+                    var context = unmarshaller.CreateContext(responseContext.HttpResponse, responseStream);
+
+                    var response = UnmarshallResponse(context, requestContext);
+                    responseContext.Response = response;
+                }
+                finally
+                {
+                    if (!unmarshaller.HasStreamingProperty)
+                        responseContext.HttpResponse.ResponseBody.Dispose();
+                }
+            }
+        }
 
         protected override void InvokeAsyncCallback(IAsyncExecutionContext executionContext)
         {

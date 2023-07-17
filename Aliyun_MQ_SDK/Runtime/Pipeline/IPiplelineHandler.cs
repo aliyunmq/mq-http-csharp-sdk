@@ -50,5 +50,17 @@ namespace Aliyun.MQ.Runtime.Pipeline
         /// <param name="executionContext">The execution context, it contains the
         /// request and response context.</param>
         void AsyncCallback(IAsyncExecutionContext executionContext);
+        
+        /// <summary>
+        /// Contains the processing logic for an asynchronous request invocation.
+        /// This method should call InnerHandler.InvokeSync to continue processing of the
+        /// request by the pipeline, unless it's a terminating handler.
+        /// </summary>
+        /// <typeparam name="T">The response type for the current request.</typeparam>
+        /// <param name="executionContext">The execution context, it contains the
+        /// request and response context.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        System.Threading.Tasks.Task<T> InvokeAsync<T>(IExecutionContext executionContext)
+            where T : WebServiceResponse, new();
     }
 }

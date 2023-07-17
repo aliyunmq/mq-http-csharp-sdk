@@ -5,6 +5,8 @@ using Aliyun.MQ.Model.Internal.MarshallTransformations;
 using Aliyun.MQ.Runtime;
 using Aliyun.MQ.Util;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Aliyun.MQ
 {
@@ -13,9 +15,9 @@ namespace Aliyun.MQ
 
         protected string _topicName;
         protected string _instanceId;
-        protected readonly AliyunServiceClient _serviceClient;
+        protected readonly HttpClientBasedAliyunServiceClient _serviceClient;
 
-        public MQProducer(string instanceId, string topicName, AliyunServiceClient serviceClient)
+        public MQProducer(string instanceId, string topicName, HttpClientBasedAliyunServiceClient serviceClient)
         {
             this._instanceId = instanceId;
             this._topicName = topicName;
@@ -62,13 +64,31 @@ namespace Aliyun.MQ
             return retMsg;
         }
 
+        public async Task<TopicMessage> PublishMessageAsync(TopicMessage topicMessage)
+        {
+            var request = new PublishMessageRequest(topicMessage.Body, topicMessage.MessageTag);
+            request.TopicName = this._topicName;
+            request.IntanceId = this._instanceId;
+            request.Properties = AliyunSDKUtils.DictToString(topicMessage.Properties);
+
+            var marshaller = PublishMessageRequestMarshaller.Instance;
+            var unmarshaller = PublishMessageResponseUnmarshaller.Instance;
+            var result = await _serviceClient.InvokeAsync<PublishMessageRequest, PublishMessageResponse>(request, marshaller,
+                unmarshaller, default(CancellationToken));
+            TopicMessage retMsg = new TopicMessage(null);
+            retMsg.Id = result.MessageId;
+            retMsg.BodyMD5 = result.MessageBodyMD5;
+            retMsg.ReceiptHandle = result.ReeceiptHandle;
+            return retMsg;
+        }
+
     }
 
     public partial class MQTransProducer : MQProducer
     {
         private readonly string _groupId;
 
-        public MQTransProducer(string instanceId, string topicName, string groupId, AliyunServiceClient serviceClient) : base(instanceId, topicName, serviceClient)
+        public MQTransProducer(string instanceId, string topicName, string groupId, HttpClientBasedAliyunServiceClient serviceClient) : base(instanceId, topicName, serviceClient)
         {
             if (string.IsNullOrEmpty(groupId))
             {
@@ -103,6 +123,23 @@ namespace Aliyun.MQ
             return _serviceClient.Invoke<AckMessageRequest, AckMessageResponse>(request, marshaller, unmarshaller);
         }
 
+        public async Task<AckMessageResponse> CommitAsync(string receiptHandle)
+        {
+            List<string> handlers = new List<string>
+            {
+                receiptHandle
+            };
+
+            var request = new AckMessageRequest(this._topicName, this._groupId, handlers);
+            request.IntanceId = this._instanceId;
+            request.Trasaction = "commit";
+            var marshaller = new AckMessageRequestMarshaller();
+            var unmarshaller = AckMessageResponseUnmarshaller.Instance;
+
+            var ackMessageResponse = await _serviceClient.InvokeAsync<AckMessageRequest, AckMessageResponse>(request, marshaller, unmarshaller, default(CancellationToken));
+            return ackMessageResponse;
+        }
+
         /// <summary>
         /// rollback transaction msg, the consumer will not receive the msg.
         /// </summary>
@@ -124,6 +161,23 @@ namespace Aliyun.MQ
             return _serviceClient.Invoke<AckMessageRequest, AckMessageResponse>(request, marshaller, unmarshaller);
         }
 
+        public async Task<AckMessageResponse> RollbackAsync(string receiptHandle)
+        {
+            List<string> handlers = new List<string>
+            {
+                receiptHandle
+            };
+
+            var request = new AckMessageRequest(this._topicName, this._groupId, handlers);
+            request.IntanceId = this._instanceId;
+            request.Trasaction = "rollback";
+            var marshaller = new AckMessageRequestMarshaller();
+            var unmarshaller = AckMessageResponseUnmarshaller.Instance;
+
+            var ackMessageResponse = await _serviceClient.InvokeAsync<AckMessageRequest, AckMessageResponse>(request, marshaller, unmarshaller, default(CancellationToken));
+            return ackMessageResponse;
+        }
+
         /// <summary>
         /// Consumes the half tranaction message.
         /// </summary>
@@ -143,6 +197,20 @@ namespace Aliyun.MQ
             ConsumeMessageResponse result = _serviceClient.Invoke<ConsumeMessageRequest, ConsumeMessageResponse>(request, marshaller, unmarshaller);
 
             return result.Messages;
+        }
+
+        public async Task<List<Message>> ConsumeHalfMessageAsync(uint batchSize, uint waitSeconds)
+        {
+            var request = new ConsumeMessageRequest(this._topicName, this._groupId, null);
+            request.IntanceId = this._instanceId;
+            request.BatchSize = batchSize;
+            request.WaitSeconds = waitSeconds;
+            request.Trasaction = "pop";
+            var marshaller = ConsumeMessageRequestMarshaller.Instance;
+            var unmarshaller = ConsumeMessageResponseUnmarshaller.Instance;
+
+            var consumeMessageResponse = await _serviceClient.InvokeAsync<ConsumeMessageRequest, ConsumeMessageResponse>(request, marshaller, unmarshaller, default(CancellationToken));
+            return consumeMessageResponse.Messages;
         }
     }
 }

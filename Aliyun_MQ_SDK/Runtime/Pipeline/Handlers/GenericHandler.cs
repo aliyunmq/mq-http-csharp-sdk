@@ -23,6 +23,12 @@ namespace Aliyun.MQ.Runtime.Pipeline.Handlers
             PostInvoke(ExecutionContext.CreateFromAsyncContext(executionContext));
             base.InvokeAsyncCallback(executionContext);           
         }
+        
+        public override System.Threading.Tasks.Task<T> InvokeAsync<T>(IExecutionContext executionContext)
+        {
+            PreInvoke(executionContext);
+            return base.InvokeAsync<T>(executionContext);
+        }
 
         protected virtual void PreInvoke(IExecutionContext executionContext) { }
 

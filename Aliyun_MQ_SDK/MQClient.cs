@@ -6,17 +6,17 @@ using Aliyun.MQ.Runtime.Internal.Auth;
 
 namespace Aliyun.MQ
 {
-    public partial class MQClient : AliyunServiceClient
+    public partial class MQClient : HttpClientBasedAliyunServiceClient
     {
         #region Constructors
 
-        public MQClient(string accessKeyId, string secretAccessKey, string regionEndpoint)
-            : base(accessKeyId, secretAccessKey, new MQConfig { RegionEndpoint = new Uri(regionEndpoint) }, null)
+        public MQClient(string accessKeyId, string secretAccessKey, string regionEndpoint, int maxErrorRetry = 3)
+            : base(accessKeyId, secretAccessKey, new MQConfig { RegionEndpoint = new Uri(regionEndpoint), MaxErrorRetry = maxErrorRetry}, null)
         {
         }
 
-		public MQClient(string accessKeyId, string secretAccessKey, string regionEndpoint, string stsToken)
-			: base(accessKeyId, secretAccessKey, new MQConfig { RegionEndpoint = new Uri(regionEndpoint) }, stsToken)
+		public MQClient(string accessKeyId, string secretAccessKey, string regionEndpoint, string stsToken, int maxErrorRetry =3)
+			: base(accessKeyId, secretAccessKey, new MQConfig { RegionEndpoint = new Uri(regionEndpoint), MaxErrorRetry = maxErrorRetry}, stsToken)
 		{
 		}
 

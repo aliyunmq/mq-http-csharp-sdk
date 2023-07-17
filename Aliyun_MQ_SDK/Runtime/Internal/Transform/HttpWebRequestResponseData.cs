@@ -84,6 +84,13 @@ namespace Aliyun.MQ.Runtime.Internal.Transform
             
             return _response.GetResponseStream();
         }
+        
+        public System.Threading.Tasks.Task<Stream> OpenResponseAsync()
+        {
+            // There is no GetResponseStreamAsync on HttpWebResponse so just
+            // reuse the sync version.
+            return System.Threading.Tasks.Task.FromResult(OpenResponse());
+        }
 
         public void Dispose()
         {
