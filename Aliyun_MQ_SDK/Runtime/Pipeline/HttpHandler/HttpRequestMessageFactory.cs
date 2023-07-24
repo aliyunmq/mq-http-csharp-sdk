@@ -466,7 +466,11 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
 
         public void WriteToRequestBody(HttpContent requestContent, byte[] content, IDictionary<string, string> contentHeaders)
         {
-            content ??= Encoding.UTF8.GetBytes("a");
+            if (null == content)
+            {
+                content = Encoding.UTF8.GetBytes("a");
+            }
+
             _request.Content = new ByteArrayContent(content);
             _request.Content.Headers.ContentLength = content.Length;
             WriteContentHeaders(contentHeaders);
