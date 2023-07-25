@@ -110,5 +110,19 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
         /// <param name="asyncResult">IAsyncResult that represents an async operation.</param>
         /// <returns>The HTTP response.</returns>
         IWebResponseData EndGetResponse(IAsyncResult asyncResult);
+        
+        /// <summary>
+        /// Gets a handle to the request content.
+        /// </summary>
+        /// <returns></returns>
+
+        System.Threading.Tasks.Task<TRequestContent> GetRequestContentAsync();
+        
+        /// <summary>
+        /// Returns the HTTP response.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns></returns>
+        System.Threading.Tasks.Task<IWebResponseData> GetResponseAsync(System.Threading.CancellationToken cancellationToken);
     }
 }

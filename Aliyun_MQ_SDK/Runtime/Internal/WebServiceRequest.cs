@@ -82,9 +82,18 @@ namespace Aliyun.MQ.Runtime.Internal
             }
         }
 
-        internal virtual bool Expect100Continue
+        /// <summary>
+        /// Gets or Sets a value indicating if "Expect: 100-continue" HTTP header will be 
+        /// sent by the client for this request. The default value is false.
+        /// </summary>
+        protected virtual bool Expect100Continue
         {
-            get { return true; }            
+            get { return false; }
+        }
+
+        internal bool GetExpect100Continue()
+        {
+            return this.Expect100Continue;
         }
 
         internal virtual bool KeepAlive

@@ -4,11 +4,14 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using Aliyun.MQ.Util;
+using NLog;
 
 namespace Aliyun.MQ.Runtime.Pipeline.RetryHandler
 {
     public class DefaultRetryPolicy : RetryPolicy
     {
+        private static readonly Logger Logger = MqLogManager.Instance.GetCurrentClassLogger();
+
         private int _maxBackoffInMilliseconds = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
 
         // Set of web exception status codes to retry on.
@@ -128,6 +131,7 @@ namespace Aliyun.MQ.Runtime.Pipeline.RetryHandler
         {
             int delay = (int)(Math.Pow(4, retries) * 100);
             delay = Math.Min(delay, maxBackoffInMilliseconds);
+            Logger.Info($"retries={retries}, delay={delay}");
             AliyunSDKUtils.Sleep(delay);
         }
 

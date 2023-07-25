@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Aliyun.MQ.Runtime.Internal;
 using Aliyun.MQ.Runtime.Internal.Util;
 
@@ -25,6 +26,16 @@ namespace Aliyun.MQ.Runtime.Pipeline
             if (this.InnerHandler != null)
             {
                 return InnerHandler.InvokeAsync(executionContext);
+            }
+            throw new InvalidOperationException("Cannot invoke InnerHandler. InnerHandler is not set.");
+        }
+        
+        public virtual Task<T> InvokeAsync<T>(IExecutionContext executionContext)
+            where T : WebServiceResponse, new()
+        {
+            if (this.InnerHandler != null)
+            {
+                return InnerHandler.InvokeAsync<T>(executionContext);    
             }
             throw new InvalidOperationException("Cannot invoke InnerHandler. InnerHandler is not set.");
         }

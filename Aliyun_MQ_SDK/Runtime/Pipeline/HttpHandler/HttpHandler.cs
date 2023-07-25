@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Text;
 using Aliyun.MQ.Runtime.Internal;
+using Aliyun.MQ.Runtime.Internal.Transform;
 using Aliyun.MQ.Runtime.Internal.Util;
 using Aliyun.MQ.Util;
 
@@ -50,11 +51,11 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
                 try
                 {
                     // Send request body if present.
-                    if (wrappedRequest.HasRequestBody())
-                    {
+                    // if (wrappedRequest.HasRequestBody())
+                    // {
                         var requestContent = httpRequest.GetRequestContent();
                         WriteContentToRequestBody(requestContent, httpRequest, executionContext.RequestContext);
-                    }
+                    // }
 
                     executionContext.ResponseContext.HttpResponse = httpRequest.GetResponse();
                 }
@@ -125,6 +126,83 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
                 throw;
             }
         }
+        
+        
+                /// <summary>
+        /// Issues an HTTP request for the current request context.
+        /// </summary>
+        /// <typeparam name="T">The response type for the current request.</typeparam>
+        /// <param name="executionContext">The execution context, it contains the
+        /// request and response context.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public override async System.Threading.Tasks.Task<T> InvokeAsync<T>(IExecutionContext executionContext)
+        {
+            IHttpRequest<TRequestContent> httpRequest = null;
+            try
+            {
+                IRequest wrappedRequest = executionContext.RequestContext.Request;
+                httpRequest = CreateWebRequest(executionContext.RequestContext);
+                httpRequest.SetRequestHeaders(wrappedRequest.Headers);
+                
+                {
+                    // Send request body if present.
+                    if (wrappedRequest.HasRequestBody())
+                    {
+                        System.Runtime.ExceptionServices.ExceptionDispatchInfo edi = null;
+                        try
+                        {
+                            var requestContent = await httpRequest.GetRequestContentAsync().ConfigureAwait(false);
+                            WriteContentToRequestBody(requestContent, httpRequest, executionContext.RequestContext);
+                        }
+                        catch(Exception e)
+                        {
+                            edi = System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e);
+                        }
+
+                        if (edi != null)
+                        {
+                            await CompleteFailedRequest(executionContext, httpRequest).ConfigureAwait(false);
+
+                            edi.Throw();
+                        }
+                    }
+                
+                    var response = await httpRequest.GetResponseAsync(executionContext.RequestContext.CancellationToken).
+                        ConfigureAwait(false);
+                    executionContext.ResponseContext.HttpResponse = response;
+                }
+                // The response is not unmarshalled yet.
+                return null;
+            }            
+            finally
+            {
+                if (httpRequest != null)
+                    httpRequest.Dispose();
+            }
+        }
+
+        private static async System.Threading.Tasks.Task CompleteFailedRequest(
+            IExecutionContext executionContext, IHttpRequest<TRequestContent> httpRequest)
+        {
+            // In some cases where writing the request body fails, HttpWebRequest.Abort
+            // may not dispose of the underlying Socket, so we need to retrieve and dispose
+            // the web response to close the socket
+            IWebResponseData iwrd = null;
+            try
+            {
+                iwrd = await httpRequest.GetResponseAsync(executionContext.RequestContext.CancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+            }
+            finally
+            {
+                if (iwrd != null && iwrd.ResponseBody != null)
+                    iwrd.ResponseBody.Dispose();
+            }
+        }
+        
 
         private void GetRequestStreamCallback(IAsyncResult result)
         {

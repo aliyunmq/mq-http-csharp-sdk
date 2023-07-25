@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using Aliyun.MQ.Runtime.Internal.Transform;
 using Aliyun.MQ.Runtime.Internal.Util;
 using Aliyun.MQ.Util;
@@ -241,6 +243,93 @@ namespace Aliyun.MQ.Runtime.Pipeline.HttpHandler
                         new HttpWebRequestResponseData(errorResponse));
                 }
                 throw;
+            }
+        }
+
+        public async Task<Stream> GetRequestContentAsync()
+        {
+            return await GetRequestContentAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        /// Gets a handle to the request content.
+        /// </summary>
+        /// <param name="cancellationToken">Used to cancel the request on demand</param>
+        /// <returns></returns>
+        public async Task<Stream> GetRequestContentAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            using (cancellationToken.Register(() => this.Abort(), useSynchronizationContext:false))
+            {
+                try
+                {
+                    return await _request.GetRequestStreamAsync().ConfigureAwait(false);
+                }
+                catch (WebException webException)
+                {
+                    // After HttpWebRequest.Abort() is called, GetRequestStreamAsync throws a WebException.
+                    // If request has been cancelled using cancellationToken, wrap the
+                    // WebException in an OperationCancelledException.
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException(webException.Message, webException, cancellationToken);
+                    }
+                    var errorResponse = webException.Response as HttpWebResponse;
+                    if (errorResponse != null)
+                    {
+                        throw new HttpErrorResponseException(webException.Message,
+                            webException,
+                            new HttpWebRequestResponseData(errorResponse));
+                    }
+
+                    throw;
+
+                }
+            }
+            
+        }
+
+        /// Returns the HTTP response.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+        /// <returns></returns>
+        public virtual async Task<IWebResponseData> GetResponseAsync(System.Threading.CancellationToken cancellationToken)
+        {
+            using (var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            using (linkedTokenSource.Token.Register(() => this.Abort(), useSynchronizationContext: false))
+            {
+                linkedTokenSource.CancelAfter(_request.Timeout);
+                
+                try
+                {
+                    var response = await _request.GetResponseAsync().ConfigureAwait(false) as HttpWebResponse;
+                    return new HttpWebRequestResponseData(response);
+                }
+                catch (WebException webException)
+                {
+                    // After HttpWebRequest.Abort() is called, GetResponseAsync throws a WebException.
+                    // If request has been cancelled using cancellationToken, wrap the
+                    // WebException in an OperationCancelledException.
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException(webException.Message, webException, cancellationToken);
+                    }
+                    
+                    if (linkedTokenSource.Token.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException(webException.Message, webException, linkedTokenSource.Token);
+                    }                    
+
+                    var errorResponse = webException.Response as HttpWebResponse;
+                    if (errorResponse != null)
+                    {
+                        throw new HttpErrorResponseException(webException.Message,
+                            webException,
+                            new HttpWebRequestResponseData(errorResponse));
+                    }
+
+                    throw;
+                }
             }
         }
 

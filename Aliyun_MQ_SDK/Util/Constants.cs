@@ -46,6 +46,10 @@ namespace Aliyun.MQ.Util
 
 
         public const string ContentTypeTextXml = "text/xml";
+        public const string ContentRangeHeader = "Content-Range";
+        public const string ContentEncodingHeader = "Content-Encoding";
+        public const string ContentDispositionHeader = "Content-Disposition";
+        public const string Expires = "Expires";
 
         public const string ContentTypeHeader = "Content-Type";
         public const string ContentLengthHeader = "Content-Length";

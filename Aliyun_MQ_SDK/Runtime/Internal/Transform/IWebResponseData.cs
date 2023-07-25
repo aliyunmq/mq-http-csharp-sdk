@@ -20,5 +20,7 @@ namespace Aliyun.MQ.Runtime.Internal.Transform
     public interface IHttpResponseBody : IDisposable
     {
         Stream OpenResponse();
+        
+        System.Threading.Tasks.Task<Stream> OpenResponseAsync();
     }
 }

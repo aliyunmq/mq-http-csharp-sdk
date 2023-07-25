@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net;
+using System.Runtime.InteropServices;
+using Aliyun.MQ.Runtime.Pipeline.HttpHandler;
 using Aliyun.MQ.Util;
 
 namespace Aliyun.MQ.Runtime
@@ -214,5 +216,115 @@ namespace Aliyun.MQ.Runtime
             return requestTimeout.HasValue ? requestTimeout
                 : (clientTimeout.HasValue ? clientTimeout : null);
         }
+        
+        /// <summary>
+        /// <para>
+        /// This is a switch used for performance testing and is not intended for production applications 
+        /// to change. This switch may be removed in a future version of the SDK as the .NET Core platform matures.
+        /// </para>
+        /// <para>
+        /// If true, the HttpClient is cached and reused for every request made by the service client 
+        /// and shared with other service clients.
+        /// </para>
+        /// <para>
+        /// For the .NET Core platform this is default to true because the HttpClient manages the connection
+        /// pool.
+        /// </para>
+        /// </summary>
+        public bool CacheHttpClient {get; set;} = true;
+        
+        /// <summary>
+        /// HttpClientFactory used to create new HttpClients.
+        /// If null, an HttpClient will be created by the SDK.
+        /// Note that IClientConfig members such as ProxyHost, ProxyPort, GetWebProxy, and AllowAutoRedirect
+        /// will have no effect unless they're used explicitly by the HttpClientFactory implementation.
+        ///
+        /// See https://docs.microsoft.com/en-us/xamarin/cross-platform/macios/http-stack?context=xamarin/ios and
+        /// https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/http-stack?context=xamarin%2Fcross-platform&tabs=macos#ssltls-implementation-build-option
+        /// for guidance on creating HttpClients for your platform.
+        /// </summary>
+        public HttpClientFactory HttpClientFactory { get; set; } = null;
+        
+        /// <summary>
+        /// Returns true if the clients should be cached by HttpRequestMessageFactory, false otherwise.
+        /// </summary>
+        /// <param name="clientConfig"></param>
+        /// <returns></returns>
+        internal static bool CacheHttpClients(ClientConfig clientConfig)
+        {
+            if (clientConfig.HttpClientFactory == null)
+                return clientConfig.CacheHttpClient;
+            else
+                return clientConfig.HttpClientFactory.UseSDKHttpClientCaching(clientConfig);
+        }
+        
+        /// <summary>
+        /// Returns true if the SDK should dispose HttpClients after one use, false otherwise.
+        /// </summary>
+        /// <param name="clientConfig"></param>
+        /// <returns></returns>
+        internal static bool DisposeHttpClients(ClientConfig clientConfig)
+        {
+            if (clientConfig.HttpClientFactory == null)
+                return !clientConfig.CacheHttpClient;
+            else
+                return clientConfig.HttpClientFactory.DisposeHttpClientsAfterUse(clientConfig);
+        }
+
+        private int? _httpClientCacheSize;
+        /// <summary>
+        /// If CacheHttpClient is set to true then HttpClientCacheSize controls the number of HttpClients cached.
+        /// <para>
+        /// On Windows the default value is 1 since the underlying native implementation does not have throttling constraints
+        /// like the non Windows Curl based implementation. For non Windows based platforms the default is the value return from 
+        /// System.Environment.ProcessorCount.
+        /// </para>
+        /// </summary>
+        public int HttpClientCacheSize
+        {
+            get
+            {
+                if(_httpClientCacheSize.HasValue)
+                {
+                    return _httpClientCacheSize.Value;
+                }
+
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 1 : Environment.ProcessorCount;
+            }
+            set => _httpClientCacheSize = value;
+        }
+        
+        /// <summary>
+        /// Get or set the value to use for <see cref="System.Net.Http.HttpClientHandler.MaxConnectionsPerServer"/> on requests.
+        /// If this property is null, <see cref="System.Net.Http.HttpClientHandler.MaxConnectionsPerServer"/>
+        /// will be left at its default value of <see cref="int.MaxValue"/>.
+        /// </summary>
+        public int? MaxConnectionsPerServer
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// Generates a <see cref="CancellationToken"/> based on the value
+        /// for <see cref="DefaultConfiguration.TimeToFirstByteTimeout"/>.
+        /// <para />
+        /// NOTE: <see cref="HttpWebRequestMessage.GetResponseAsync"/> uses 
+        /// </summary>
+        // internal CancellationToken BuildDefaultCancellationToken()
+        // {
+            // // legacy mode never had a working cancellation token, so keep it to default()
+            // if (DefaultConfiguration.Name == Runtime.DefaultConfigurationMode.Legacy)
+            //     return default(CancellationToken);
+            //
+            // // TimeToFirstByteTimeout is not a perfect match with HttpWebRequest/HttpClient.Timeout.  However, given
+            // // that both are configured to only use Timeout until the Response Headers are downloaded, this value
+            // // provides a reasonable default value.
+            // var cancelTimeout = DefaultConfiguration.TimeToFirstByteTimeout;
+            //
+            // return cancelTimeout.HasValue
+            //     ? new CancellationTokenSource(cancelTimeout.Value).Token
+            //     : default(CancellationToken);
+        // }
     }
 }
